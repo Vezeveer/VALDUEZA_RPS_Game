@@ -11,10 +11,15 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button rockBtn, paperBtn, scissorsBtn, bestOf3btn, bestOf5Btn, bestOf7btn;
+    private Button rockBtn, paperBtn, scissorsBtn,
+            bestOf3btn, bestOf5Btn, bestOf7btn;
     private int turns = 0;
+    private int round = 1;
     private int player2choice;
     private TextView messageTextView;
+    private int roundScore = 0;
+    private String p2StrChoice = "";
+    private String roundResult = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         bestOf7btn = findViewById(R.id.bestOf7_btn);
 
         messageTextView = findViewById(R.id.message_here);
-
+        resetMessageText();
         activeBtnRockPaperSci(false);
 
         bestOf3btn.setOnClickListener(new View.OnClickListener() {
@@ -38,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
                 activeBtnRockPaperSci(true);
                 activeBtnBestOf(false);
                 turns = 3;
-                //Log.d("TEST", "turns: " + turns);
             }
         });
 
@@ -46,15 +50,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 player2Rolled();
-                effectRPS();
-                if(player2choice == 0){
-                    messageTextView.setText("Player 2 picked rock! It's a draw");
-                    showMsg("Player 2 picked rock! It's a draw");
-                    effectRPS();
-                } else if (player2choice == 1){
-                    showMsg("Player 2 picked paper! You lost a round");
-                } else {
-                    showMsg("Player 2 picked scissors! You win this round");
+                effectRPS("rock");
+                roundResult = getRoundResult(0);
+                messageTextView.setText("Player 2 - " +
+                        p2StrChoice + "\nRound " +
+                        roundResult + "\n" + round + "\\" + turns);
+                if(roundScore > (turns - roundScore)){
+                    messageTextView.setText("Congrats. You win!");
                 }
             }
         });
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 player2Rolled();
-                effectRPS();
+                effectRPS("paper");
                 if(player2choice == 0){
                     showMsg("Player 2 picked rock! You win a round");
                 } else if (player2choice == 1){
@@ -78,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 player2Rolled();
-                effectRPS();
+                effectRPS("scissors");
                 if(player2choice == 0){
                     showMsg("Player 2 picked rock! You lose a round");
                 } else if (player2choice == 1){
@@ -89,6 +91,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private String getRoundResult(int player1){
+        if(player1 == player2choice){
+            return "Draw";
+        } else if (player1 == 0 && player2choice == 1 ||
+                    player1 == 1 && player2choice == 2 ||
+                    player1 == 2 && player2choice == 0){
+            return "Loss";
+        } else {
+            roundScore++;
+            return "Won";
+        }
     }
 
     private void activeBtnRockPaperSci(boolean enabled){
@@ -105,22 +120,47 @@ public class MainActivity extends AppCompatActivity {
 
     private void player2Rolled(){
         player2choice = ((int) (Math.random()*(3)));
+        if(player2choice == 0){
+            p2StrChoice = "Rock";
+        } else if (player2choice == 1){
+            p2StrChoice = "Paper";
+        } else {
+            p2StrChoice = "Scissors";
+        }
     }
 
     private void showMsg(String msg){
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
-    private void effectRPS(){
-        activeBtnRockPaperSci(false);
+    private void effectRPS(String btn){
+        if(btn == "rock"){
+            rockBtn.setEnabled(false);
+        } else if (btn == "paper"){
+            paperBtn.setEnabled(false);
+        } else {
+            scissorsBtn.setEnabled(false);
+        }
+        rockBtn.setClickable(false);
+        paperBtn.setClickable(false);
+        scissorsBtn.setClickable(false);
         new CountDownTimer(2000, 1000){
             @Override
             public void onTick(long l) {
 
             }
             public void onFinish(){
-                activeBtnRockPaperSci(true);
+                paperBtn.setClickable(true);
+                scissorsBtn.setClickable(true);
+                rockBtn.setClickable(true);
+                paperBtn.setEnabled(true);
+                scissorsBtn.setEnabled(true);
+                rockBtn.setEnabled(true);
             }
         }.start();
+    }
+
+    private void resetMessageText(){
+        messageTextView.setText("Player 1 - You \nPlayer 2 - Computer \nPick a \"Best of\" category");
     }
 }
