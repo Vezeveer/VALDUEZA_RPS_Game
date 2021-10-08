@@ -2,11 +2,12 @@ package com.bignerdranch.android.valdueza_rpsgame;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,13 +19,14 @@ public class MainActivity extends AppCompatActivity {
     private int round = 1;
     private int player2choice;
     private TextView messageTextView, winsTextView,
-            p1TextView, p2TextView;
+            p1Btn, p2Btn;
     private int p1RoundScore = 0;
     private int p2RoundScore = 0;
     private int wins = 0;
     private String p2StrChoice = "";
     private String roundResult = "";
     private boolean roundComplete = false;
+    private LinearLayout linearLayoutMain;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,10 +42,16 @@ public class MainActivity extends AppCompatActivity {
 
         winsTextView = findViewById(R.id.wins_text);
         messageTextView = findViewById(R.id.message_here);
-        p1TextView = findViewById(R.id.p1_text);
-        p2TextView = findViewById(R.id.p2_text);
+        p1Btn = findViewById(R.id.p1_btn);
+        p2Btn = findViewById(R.id.p2_btn);
         resetMessageText();
         activeBtnRockPaperSci(false);
+        linearLayoutMain = findViewById(R.id.layout_main);
+
+        p1Btn.setClickable(false);
+        p2Btn.setClickable(false);
+        p1Btn.setBackgroundColor(Color.parseColor("#2643b5"));
+        p2Btn.setBackgroundColor(Color.parseColor("#b5ae26"));
 
         bestOf3Btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
                 activeBtnBestOf(false);
                 resetAll();
                 turns = 3;
+                linearLayoutMain.setBackgroundColor(Color.parseColor("#FFFFFF"));
             }
         });
 
@@ -64,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
                 activeBtnBestOf(false);
                 resetAll();
                 turns = 5;
+                linearLayoutMain.setBackgroundColor(Color.parseColor("#FFFFFF"));
             }
         });
 
@@ -75,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 activeBtnBestOf(false);
                 resetAll();
                 turns = 7;
+                linearLayoutMain.setBackgroundColor(Color.parseColor("#FFFFFF"));
             }
         });
 
@@ -82,46 +93,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 player2Rolled();
-                roundResult = getRoundResult(0);
-                String strOpeningMsg = "Player 2 - " +
-                        p2StrChoice + "\nRound " +
-                        roundResult + "\n" + round + "\\" + turns;
-                String strWinMsg = "Player 2 - " +
-                        p2StrChoice + "\nCongrats. You win!";
-                String strUpdateWins = "Player 1:\n" + wins + " Wins";
-                String strLostMessage = "Player 2 - " +
-                        p2StrChoice + "\nYou Lost the game.";
-                String strDrawMessage = "Player 2 - " +
-                        p2StrChoice +"\nIt's a DRAW. No one wins";
-                String strP1RoundScore = "P1: "+p1RoundScore;
-                String strP2RoundScore = "P2: "+p2RoundScore;
-
-                messageTextView.setText(strOpeningMsg);
-
-                if(p1RoundScore > (turns - p1RoundScore) ||
-                        (round == turns && p2RoundScore < p1RoundScore)){
-                    messageTextView.setText(strWinMsg);
-                    wins++;
-                    winsTextView.setText(strUpdateWins);
-                    roundComplete = true;
-                    activeBtnRockPaperSci(false);
-                    activeBtnBestOf(true);
-                } else if(p2RoundScore > (turns - p2RoundScore) ||
-                        (round == turns && p2RoundScore > p1RoundScore)){
-                    messageTextView.setText(strLostMessage);
-                    activeBtnRockPaperSci(false);
-                    activeBtnBestOf(true);
-                    roundComplete = true;
-                } else if(round == turns){
-                    messageTextView.setText(strDrawMessage);
-                    activeBtnRockPaperSci(false);
-                    activeBtnBestOf(true);
-                    roundComplete = true;
-                }
-                effectRPS("rock");
-                p1TextView.setText(strP1RoundScore);
-                p2TextView.setText(strP2RoundScore);
-                round++;
+                updateRound(0, "rock");
             }
         });
 
@@ -129,14 +101,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 player2Rolled();
-                effectRPS("paper");
-                if(player2choice == 0){
-                    showMsg("Player 2 picked rock! You win a round");
-                } else if (player2choice == 1){
-                    showMsg("Player 2 picked paper! It's a draw");
-                } else {
-                    showMsg("Player 2 picked scissors! You lose a round");
-                }
+                updateRound(1, "paper");
             }
         });
 
@@ -144,17 +109,55 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 player2Rolled();
-                effectRPS("scissors");
-                if(player2choice == 0){
-                    showMsg("Player 2 picked rock! You lose a round");
-                } else if (player2choice == 1){
-                    showMsg("Player 2 picked paper! You win a round");
-                } else {
-                    showMsg("Player 2 picked scissors! It's a draw");
-                }
+                updateRound(2,"scissors");
             }
         });
 
+    }
+
+    private void updateRound(int btnPosition, String btnPressed) {
+        roundResult = getRoundResult(btnPosition);
+        String strOpeningMsg = "Player 2 - " +
+                p2StrChoice + "\nRound " +
+                roundResult + "\n" + round + "\\" + turns;
+        String strWinMsg = "Player 2 - " +
+                p2StrChoice + "\nCongrats. You win!";
+        String strLostMessage = "Player 2 - " +
+                p2StrChoice + "\nYou Lost the game.";
+        String strDrawMessage = "Player 2 - " +
+                p2StrChoice +"\nIt's a DRAW. No one wins";
+        String strP1RoundScore = "P1: "+p1RoundScore;
+        String strP2RoundScore = "P2: "+p2RoundScore;
+
+        messageTextView.setText(strOpeningMsg);
+
+        if(p1RoundScore > (turns - p1RoundScore) ||
+                (round == turns && p2RoundScore < p1RoundScore)){
+            wins++;
+            winsTextView.setText("Player 1:\n" + wins + " Wins");
+            linearLayoutMain.setBackgroundColor(Color.parseColor("#7aeb34"));
+            roundComplete = true;
+            messageTextView.setText(strWinMsg);
+            activeBtnRockPaperSci(false);
+            activeBtnBestOf(true);
+        } else if(p2RoundScore > (turns - p2RoundScore) ||
+                (round == turns && p2RoundScore > p1RoundScore)){
+            messageTextView.setText(strLostMessage);
+            activeBtnRockPaperSci(false);
+            activeBtnBestOf(true);
+            linearLayoutMain.setBackgroundColor(Color.parseColor("#eb4034"));
+            roundComplete = true;
+        } else if(round == turns){
+            messageTextView.setText(strDrawMessage);
+            activeBtnRockPaperSci(false);
+            activeBtnBestOf(true);
+            linearLayoutMain.setBackgroundColor(Color.parseColor("#a0b9e8"));
+            roundComplete = true;
+        }
+        effectRPS(btnPressed);
+        p1Btn.setText(strP1RoundScore);
+        p2Btn.setText(strP2RoundScore);
+        round++;
     }
 
     private void resetAll() {
@@ -162,14 +165,12 @@ public class MainActivity extends AppCompatActivity {
         p1RoundScore = 0;
         p2RoundScore = 0;
         roundComplete = false;
-        p1TextView.setText("P1");
-        p2TextView.setText("P2");
+        p1Btn.setText("P1");
+        p2Btn.setText("P2");
     }
 
     private String getRoundResult(int player1){
         if(player1 == player2choice){
-            //p1RoundScore++;
-            //p2RoundScore++;
             return "Draw";
         } else if (player1 == 0 && player2choice == 1 ||
                     player1 == 1 && player2choice == 2 ||
@@ -187,8 +188,8 @@ public class MainActivity extends AppCompatActivity {
         paperBtn.setEnabled(enabled);
         scissorsBtn.setEnabled(enabled);
         rockBtn.setClickable(enabled);
-        rockBtn.setClickable(enabled);
-        rockBtn.setClickable(enabled);
+        paperBtn.setClickable(enabled);
+        scissorsBtn.setClickable(enabled);
     }
 
     private void activeBtnBestOf(boolean enabled){
@@ -223,8 +224,8 @@ public class MainActivity extends AppCompatActivity {
         rockBtn.setClickable(false);
         paperBtn.setClickable(false);
         scissorsBtn.setClickable(false);
-        if(roundComplete != true){
-            new CountDownTimer(2000, 1000){
+        if(!roundComplete){
+            new CountDownTimer(1000, 1000){
                 @Override
                 public void onTick(long l) {
 
@@ -242,6 +243,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void resetMessageText(){
-        messageTextView.setText("Player 1 - You \nPlayer 2 - Computer \nPick a \"Best of\" category");
+        String firstMsg = "Player 1 - You \nPlayer 2 - Computer" +
+                "\nPick a \"Best of\" category";
+        messageTextView.setText(firstMsg);
     }
 }

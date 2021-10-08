@@ -3,19 +3,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:id="@+id/layout_main">
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        >
+        android:layout_height="wrap_content">
         <Button
-            android:id="@+id/p1_text"
+            android:id="@+id/p1_btn"
             android:text="P1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
-            android:id="@+id/p2_text"
+            android:id="@+id/p2_btn"
             android:text="P2"
             android:layout_marginLeft="5dp"
             android:layout_width="wrap_content"
